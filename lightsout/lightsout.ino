@@ -1,5 +1,4 @@
 // Include the SPI library
-#include "SwitchState.h"
 #include <SPI.h>
 #define SW1 2
 #define SW2 3
@@ -60,8 +59,8 @@ void turnAllOn(void){
  digitalWrite(OE,LOW);
 
 }
-
 void setup() {
+  switches = on;
 //  SPI.begin();
   pinMode(chipSelectPin,OUTPUT);
   pinMode(13, OUTPUT); // SCK set to output
@@ -82,6 +81,9 @@ void setup() {
   Serial.println("Setup complete...");
 }
 
+// instantiate switch state
+
+
 void loop() {
  
   turnAllOn();
@@ -93,7 +95,7 @@ void loop() {
  Serial.print("SW1 = "); Serial.print(digitalRead(SW1)); Serial.print(" SW2 = "); Serial.print(digitalRead(SW2)); Serial.print(" SW3 = "); Serial.print(digitalRead(SW3)); Serial.print(" SW4 = "); Serial.print(digitalRead(SW4));Serial.println();
  Serial.print("PB1 = "); Serial.print(digitalRead(push1)); Serial.print(" PB2 = "); Serial.print(digitalRead(push2)); Serial.print(" PB3 = "); Serial.print(digitalRead(push3)); Serial.print(" PB4 = "); Serial.print(digitalRead(push4));Serial.println('\n');
   
-  
+
 
 /*
   
