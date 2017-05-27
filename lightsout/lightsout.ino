@@ -7,6 +7,7 @@ const short ledArrayHeight = 4;
 const short ledArrayWidth  = 4;
 boolean ledArray[ledArrayHeight][ledArrayWidth];
 
+SPISettings spiSettings(14000000,LSBFIRST,SPI_MODE2); // instantiate spiSettings
 /* 
  * Set each LED in the array to be either high or low
  * Input:
@@ -32,6 +33,8 @@ void updateLedArray(boolean leds, const short height, const short width){
 }
 
 void setup() {
+  Serial.begin(9600); // initialize serial at 9600 baud
+  Serial.println("Setup...");
   pinMode( OE, OUTPUT );
   // Set the slaveSelectPin as output
   pinMode( slaveSelectPin, OUTPUT );
@@ -42,7 +45,7 @@ void setup() {
   digitalWrite(slaveSelectPin, LOW);
   
   // Initialize SPI
-  SPI.beginTransaction(SPISettings(30000000, LSBFIRST, SPI_MODE2));
+  SPI.beginTransaction(spiSettings);
   //SPI.begin();
   // Initialize array to random bool values
   //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  randomizeLedArray(ledArray);
@@ -70,7 +73,8 @@ void setup() {
   digitalWrite(OE, LOW);
   delay(50);                                                                 
   digitalWrite(OE, HIGH);
-  
+
+  Serial.println("Setup complete...");
 }
 
 void loop() {
