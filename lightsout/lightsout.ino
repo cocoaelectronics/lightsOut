@@ -1,5 +1,7 @@
 // Include the SPI library
 #include <SPI.h>
+
+#include "STP16CP26.h" // Include library for using the LED driver
 #define SW1 2
 #define SW2 3
 #define SW3 4
@@ -19,6 +21,8 @@ const short ledArrayWidth  = 4;
 boolean ledArray[ledArrayHeight][ledArrayWidth];
 
 SPISettings spiSettings(14000000,MSBFIRST,SPI_MODE0); // instantiate spiSettings
+
+STP16CP26 ledDriver(OE,chipSelectPin); // instantiate object ledDrive of class STP16CP26
 /* 
  * Set each LED in the array to be either high or low
  * Input:
@@ -61,7 +65,7 @@ void turnAllOn(void){
 }
 void setup() {
 
-//  SPI.begin();
+  
   pinMode(chipSelectPin,OUTPUT);
   pinMode(13, OUTPUT); // SCK set to output
   pinMode(11,OUTPUT);  // MOSI set to output
@@ -79,6 +83,7 @@ void setup() {
   // Take the chipSelectPin pin low to select the chip
 
   Serial.println("Setup complete...");
+  ledDriver.init(0xFFFF);
 }
 
 // instantiate switch state
@@ -86,10 +91,12 @@ void setup() {
 
 void loop() {
  
-  turnAllOn();
+ // turnAllOn();
 
-
+  ledDriver.setState(0xF3A2);
   delay(2000);
+  ledDriver.setState(0xFFFF);
+  delay(1000);
 
  // check status of switches
  Serial.print("SW1 = "); Serial.print(digitalRead(SW1)); Serial.print(" SW2 = "); Serial.print(digitalRead(SW2)); Serial.print(" SW3 = "); Serial.print(digitalRead(SW3)); Serial.print(" SW4 = "); Serial.print(digitalRead(SW4));Serial.println();
