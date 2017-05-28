@@ -50,7 +50,7 @@ void turnAllOn(void){
 //  SPI.begin();
  digitalWrite(OE,HIGH);
  digitalWrite(chipSelectPin,LOW);
- SPI.transfer16(0b1000010100111001);
+ SPI.transfer16(0b1001010111111001);
  digitalWrite(chipSelectPin,HIGH);
  SPI.endTransaction();
   delay(10);
@@ -60,7 +60,7 @@ void turnAllOn(void){
 
 }
 void setup() {
-  switches = on;
+
 //  SPI.begin();
   pinMode(chipSelectPin,OUTPUT);
   pinMode(13, OUTPUT); // SCK set to output
