@@ -10,14 +10,17 @@ STP16CP26::STP16CP26(const int OE, const int chipSelectPin):_OE(OE),_cs(chipSele
 
 }
 
+
 void STP16CP26::init(uint16_t initLEDState){
 	ledState = initLEDState;
 	setState(ledState);
-	
-	
+
+
 }
 
 void STP16CP26::setState(uint16_t state){
+	this->ledState = state;
+
 	SPI.beginTransaction(SPISettings(14000000,MSBFIRST,SPI_MODE0));
 
 	digitalWrite(_OE,HIGH);
@@ -32,9 +35,16 @@ void STP16CP26::setState(uint16_t state){
 }
 
 void STP16CP26::on(uint8_t pin){
-	
+	uint16_t pinMask = 0;
+	pinMask = pinMask + (1 << pin);
+	uint16_t newState = (pinMask | this->ledState);
+	setState(newState);
 }
 
 void STP16CP26::off(uint8_t pin){
-	
+	uint16_t pinMask = 0;
+	pinMask = pinMask + (1 << pin);
+	pinMask = pinMask ^ 1;
+	uint16_t newState = (pinMask | this->ledState);
+	setState(newState);
 }
