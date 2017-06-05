@@ -5,16 +5,16 @@
 #include "STP16CP26.h" 
 
 // Pins for slider switch at top
-#define SW1 2
-#define SW2 3
-#define SW3 4
-#define SW4 5
+#define SW1 5
+#define SW2 4
+#define SW3 3
+#define SW4 2
 
 // Pins for push buttons along side
-#define push1 A1
-#define push2 A2
-#define push3 A3
-#define push4 A4
+#define PUSH1 A4
+#define PUSH2 A3
+#define PUSH3 A2
+#define PUSH4 A1
 
 #define OE 9
 #define CHIPSELECTPIN 10
@@ -22,11 +22,16 @@
 #define LEDARRAYHEIGHT  4
 #define LEDARRAYWIDTH 4
 
+//Variable to hold the state of each LED in the grid
 boolean ledArray[LEDARRAYHEIGHT][LEDARRAYWIDTH];
-
-SPISettings spiSettings(14000000,MSBFIRST,SPI_MODE0); // instantiate spiSettings
+int sliderArray[4] = {SW1, SW2, SW3, SW4};
+int pushArray[4]   = {PUSH1,  PUSH2,  PUSH3,  PUSH4};
+// Variable to save which button/slider value has been selected each iteration
+int sliderSelect = 0;
+int pushSelect   = 0;
 
 STP16CP26 ledDriver(OE,CHIPSELECTPIN); // instantiate object ledDrive of class STP16CP26
+
 /* 
  * Set each LED in the array to be either high or low
  * Input:
@@ -38,6 +43,10 @@ STP16CP26 ledDriver(OE,CHIPSELECTPIN); // instantiate object ledDrive of class S
  * Call UpdateLedArray afterwards to actually turn on or off the LEDS
  */
 void randomizeLedArray(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
+  // Set up random number generator with a new seed
+  // If this doesn't happen, it gives the same pattern every time you turn it on
+  randomSeed(analogRead(0));
+  
   for(short i = 0; i < LEDARRAYHEIGHT; i++){
     for(short k = 0; k < LEDARRAYWIDTH; k++){
       leds[i][k] = random(10)%2;
@@ -71,57 +80,76 @@ uint16_t generateTransferValue(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
   return transferValue;
 }
 
+// Toggle selected LEDs, and the adjacent LEDs as well
+void toggleLedAndNeighbors(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
+  
+}
+
+
 
 //------------------------------------------------------------------------------------------------------------------
 
 void setup() {
   Serial.begin(9600); // initialize serial at 9600 baud
   Serial.println("Setup...");
+
   
   pinMode(CHIPSELECTPIN,OUTPUT);
   pinMode(OE, OUTPUT );
   pinMode(13, OUTPUT); // SCK set to output
   pinMode(11,OUTPUT);  // MOSI set to output
+
+  // Set slider pinmodes
+  pinMode(SW1,INPUT);
+  pinMode(SW2,INPUT);
+  pinMode(SW3,INPUT);
+  pinMode(SW4,INPUT);
+
+  // Set pushbutton pinmodes
+  pinMode(PUSH1,INPUT);
+  pinMode(PUSH2,INPUT);
+  pinMode(PUSH3,INPUT);
+  pinMode(PUSH4,INPUT);
+
   
   Serial.println("Setup complete...");
-  ledDriver.init(0b0101010101010101);
+  randomizeLedArray(ledArray);
+  ledDriver.init(generateTransferValue(ledArray));
 
   
   // Delay 2 seconds after setup
   delay(2000);
+
 }
 
 void loop() {
 
-  // Test code. Flashes a random pattern and then a test pattern.
-  randomizeLedArray(ledArray);
-  ledDriver.setState(generateTransferValue(ledArray));
-  delay(1000);
-  ledDriver.setState(0b1010101010101010);
-  delay(1000);
+  boolean buttonSelected = false;
   
+  // See which position the slider is in
+  for(int i = 0; i < LEDARRAYWIDTH; i++){
+    if( digitalRead(sliderArray[i]) == LOW){
+      sliderSelect = i;
+      break;
+    }
+  }
 
+  // See which push button is selected, if any
+  for(int i = 0; i < LEDARRAYHEIGHT; i++){
+    if( digitalRead(pushArray[i]) == LOW ){
+      pushSelect = i;
+      buttonSelected = true;
+    }
+  }
+
+
+  // If a button was pressed, toggle the LED at the intersection of the button and the slider
+  if( buttonSelected ){
+    ledArray[pushSelect][sliderSelect] = !ledArray[pushSelect][sliderSelect];
+    ledDriver.setState( generateTransferValue(ledArray) );
+  }
+  
  // check status of switches
  Serial.print("SW1 = "); Serial.print(digitalRead(SW1)); Serial.print(" SW2 = "); Serial.print(digitalRead(SW2)); Serial.print(" SW3 = "); Serial.print(digitalRead(SW3)); Serial.print(" SW4 = "); Serial.print(digitalRead(SW4));Serial.println();
- Serial.print("PB1 = "); Serial.print(digitalRead(push1)); Serial.print(" PB2 = "); Serial.print(digitalRead(push2)); Serial.print(" PB3 = "); Serial.print(digitalRead(push3)); Serial.print(" PB4 = "); Serial.print(digitalRead(push4));Serial.println('\n');
-  
-
-
-/*
-  
-
-
-  
-
-  //SPI.transfer( b1 );
-  SPI.transfer16(0xA5A5);
-
-  // Take the chipSelectPin pin high to deselect the pin
-  digitalWrite(chipSelectPin, HIGH);
-  delay(50);
-  digitalWrite(chipSelectPin, LOW);
-
-  digitalWrite(OE, LOW);
-*/
-
+ Serial.print("PB1 = "); Serial.print(digitalRead(PUSH1)); Serial.print(" PB2 = "); Serial.print(digitalRead(PUSH2)); Serial.print(" PB3 = "); Serial.print(digitalRead(PUSH3)); Serial.print(" PB4 = "); Serial.print(digitalRead(PUSH4));Serial.println('\n');
 }
