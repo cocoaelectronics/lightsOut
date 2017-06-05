@@ -44,7 +44,7 @@ void STP16CP26::on(uint8_t pin){
 void STP16CP26::off(uint8_t pin){
 	uint16_t pinMask = 0;
 	pinMask = pinMask + (1 << pin);
-	pinMask = pinMask ^ 1;
-	uint16_t newState = (pinMask | this->ledState);
+	pinMask = ~pinMask;
+	uint16_t newState = (pinMask & this->ledState);
 	setState(newState);
 }
