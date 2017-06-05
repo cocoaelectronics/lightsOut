@@ -81,10 +81,63 @@ uint16_t generateTransferValue(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
 }
 
 // Toggle selected LEDs, and the adjacent LEDs as well
-void toggleLedAndNeighbors(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
-  
+// Input:
+//   - leds: Array representing LED grid
+//   - x: X coordinate of LED to toggle
+//   - y: Y coordinate of LED to toggle
+// Side Effects: Changes values in leds array passed in
+void toggleLedAndNeighbors(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH], int x, int y){
+  // Toggle main LED
+  leds[y][x] = !leds[y][x];
+
+  // Toggle Neighboring LEDS
+  // When toggling the neighboring LEDs, do nothing if the neighbor is outside the grid
+  // i.e. don't wrap
+  // Toggle LED above
+  if( (y-1) >= 0 && (y-1) < LEDARRAYHEIGHT ){
+    leds[y-1][x] = !leds[y-1][x];
+  }
+  // Toggle LED left
+  if( (x-1) >= 0 && (x-1) < LEDARRAYWIDTH ){
+    leds[y][x-1] = !leds[y][x-1];
+  }
+  // Toggle LED right
+  if( (x+1) >= 0 && (x+1) < LEDARRAYWIDTH ){
+    leds[y][x+1] = !leds[y][x+1];
+  }
+  // Toggle LED left
+  if( (y+1) >=0 && (y+1) < LEDARRAYHEIGHT ){
+    leds[y+1][x] = !leds[y+1][x];
+  }
 }
 
+// Randomize the LEDs in the array, and output that to the grid
+void setupGame(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
+  randomizeLedArray(leds);
+  ledDriver.init(generateTransferValue(ledArray));
+}
+
+// Check if every LED is cleared
+// Return a boolean indicating if the grid is cleared
+// true = game over
+// false = game on
+boolean isCleared(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
+  boolean solved = true;
+  
+  for(int i = 0; i < LEDARRAYHEIGHT; i++){
+    for(int k = 0; k < LEDARRAYWIDTH; k++){
+      if( !leds[i][k] ){
+        solved = false;
+        break;
+      }
+    }
+    if( solved == false ){
+      break;
+    }
+  }
+
+  return solved;
+}
 
 
 //------------------------------------------------------------------------------------------------------------------
@@ -113,9 +166,40 @@ void setup() {
 
   
   Serial.println("Setup complete...");
-  randomizeLedArray(ledArray);
-  ledDriver.init(generateTransferValue(ledArray));
 
+  // Test on
+  for( int i = 0; i < 16; i++ ){
+    ledDriver.on(i);
+    delay(100);
+  }
+
+  setupGame(ledArray);
+  delay(1000);
+  
+  // Test off
+  for( int i = 0; i < 16; i++ ){
+    ledDriver.off(i);
+    delay(100);
+  }
+
+  // Check if the game is cleared(over).
+  // If so, restart
+  if( isCleared(ledArray) ){
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+  }
+  
+  setupGame(ledArray);
   
   // Delay 2 seconds after setup
   delay(2000);
@@ -145,8 +229,28 @@ void loop() {
 
   // If a button was pressed, toggle the LED at the intersection of the button and the slider
   if( buttonSelected ){
-    ledArray[pushSelect][sliderSelect] = !ledArray[pushSelect][sliderSelect];
+    //ledArray[pushSelect][sliderSelect] = !ledArray[pushSelect][sliderSelect];
+    toggleLedAndNeighbors(ledArray, sliderSelect, pushSelect);
     ledDriver.setState( generateTransferValue(ledArray) );
+  }
+
+  // Check if the game is cleared(over).
+  // If so, restart
+  if( isCleared(ledArray) ){
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+
+    setupGame(ledArray);
   }
   
  // check status of switches
