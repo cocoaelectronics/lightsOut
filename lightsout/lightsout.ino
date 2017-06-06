@@ -125,8 +125,10 @@ boolean isCleared(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
   boolean solved = true;
   
   for(int i = 0; i < LEDARRAYHEIGHT; i++){
-    for(int k = 0; k < LEDARRAYWIDTH; k++){
-      if( !leds[i][k] ){
+    for(int k = 0; k < LEDARRAYWIDTH; k++){\
+      // Check if the LED at this position should be on
+      // Worth noting that the values in ledArray can differ from what is displayed on the grid
+      if( leds[i][k] == true ){
         solved = false;
         break;
       }
@@ -139,6 +141,53 @@ boolean isCleared(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH]){
   return solved;
 }
 
+// Just here to test functionality. Not for use in the real game.
+// This will light up all the leds one by one
+//  display a random pattern
+//  turn all the leds off one by one
+//  reset the game once it is cleared
+void testFunctions(boolean leds[LEDARRAYHEIGHT][LEDARRAYWIDTH] ){
+  // Test on
+  for( int i = 0; i < 16; i++ ){
+    ledDriver.on(i);
+    delay(100);
+  }
+
+  setupGame(ledArray);
+  delay(1000);
+  
+  // Test off
+  for( int i = 0; i < 16; i++ ){
+    ledDriver.off(i);
+    delay(100);
+  }
+
+  // off() doesn't actually effect the ledArray values, so you need to update the array to match reality
+  for( int i = 0; i < LEDARRAYHEIGHT; i++ ){
+    for( int k = 0; k < LEDARRAYWIDTH; k++ ){
+      ledArray[i][k] = false;
+    }
+  }
+
+  // Check if the game is cleared(over).
+  // If so, restart
+  if( isCleared(ledArray) == true ){
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+    ledDriver.setState(0);
+    delay(250);
+    ledDriver.setState(0b1111111111111111);
+    delay(250);
+
+    setupGame(ledArray);
+  }
+}
 
 //------------------------------------------------------------------------------------------------------------------
 
@@ -167,42 +216,13 @@ void setup() {
   
   Serial.println("Setup complete...");
 
-  // Test on
-  for( int i = 0; i < 16; i++ ){
-    ledDriver.on(i);
-    delay(100);
-  }
-
-  setupGame(ledArray);
-  delay(1000);
+  // Enable for testing
+  // testFunctions( ledArray );
   
-  // Test off
-  for( int i = 0; i < 16; i++ ){
-    ledDriver.off(i);
-    delay(100);
-  }
-
-  // Check if the game is cleared(over).
-  // If so, restart
-  if( isCleared(ledArray) ){
-    ledDriver.setState(0);
-    delay(250);
-    ledDriver.setState(0b1111111111111111);
-    delay(250);
-    ledDriver.setState(0);
-    delay(250);
-    ledDriver.setState(0b1111111111111111);
-    delay(250);
-    ledDriver.setState(0);
-    delay(250);
-    ledDriver.setState(0b1111111111111111);
-    delay(250);
-  }
-  
-  setupGame(ledArray);
+  setupGame( ledArray );
   
   // Delay 2 seconds after setup
-  delay(2000);
+  delay( 2000 );
 
 }
 
