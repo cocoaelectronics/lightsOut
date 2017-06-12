@@ -242,6 +242,7 @@ void loop() {
   for(int i = 0; i < LEDARRAYHEIGHT; i++){
     if( digitalRead(pushArray[i]) == LOW ){
       pushSelect = i;
+      delay(100); // add delay to ensure not constantly reading
       buttonSelected = true;
     }
   }
